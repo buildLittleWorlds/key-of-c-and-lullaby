@@ -117,6 +117,29 @@
   details[open] summary{color:var(--ink);margin-bottom:10px}
   details p{font-size:.83rem;color:var(--muted);margin:0 0 9px}
   details b{color:var(--ink)}
+
+  /* scholarly section */
+  .scholar{margin:34px 0 0;border-top:1px solid var(--line);padding-top:26px}
+  .scholar > .eyebrow{margin-bottom:10px}
+  .scholar h2{font-family:Georgia,serif;font-weight:400;font-size:1.35rem;margin:0 0 14px;color:var(--ink)}
+  .scholar p{font-size:.9rem;color:var(--ink);margin:0 0 14px;max-width:62ch}
+  .scholar p.q{color:var(--muted)}
+  .feat{list-style:none;padding:0;margin:0 0 18px}
+  .feat li{
+    border-left:2px solid var(--train);padding:2px 0 2px 14px;margin:0 0 12px;
+    font-size:.88rem;
+  }
+  .feat li b{color:var(--train);font-weight:600}
+  .feat li .why{color:var(--muted);display:block;margin-top:2px;font-size:.83rem}
+  sup a{color:var(--train);text-decoration:none;font-size:.7em;padding:0 1px}
+  sup a:hover{text-decoration:underline}
+  .refs{margin-top:24px;border-top:1px solid var(--line);padding-top:16px}
+  .refs h3{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+  .refs ol{margin:0;padding-left:20px}
+  .refs li{font-size:.78rem;color:var(--muted);margin:0 0 10px;line-height:1.45}
+  .refs li a{color:var(--rule);text-decoration:none}
+  .refs li a:hover{text-decoration:underline}
+  .refs li:target{color:var(--ink)}
   footer{margin-top:30px;font-size:.72rem;color:var(--line);text-align:center}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -175,6 +198,70 @@
     <p><b>What it only suggests:</b> that this is how a “trained model” works. It isn't, quite. The weights here are just a tally — I counted how often each scale-degree appears in three public-domain lullabies (Brahms, Twinkle, Rock-a-bye) and shaded the keys to match. That's a <em>histogram</em>, not a network. A real learned model weighs notes <em>in context</em> (what came before), holds thousands of such odds at once, and would happily suggest an out-of-key note if the examples did. This toy has no memory of your last note at all.</p>
     <p><b>The honest punchline:</b> push far enough and the rule dissolves into the vibe. “Only scale notes” is really just “these notes got weight 1, the rest weight 0” — the hardest possible version of a trained preference. Law is habit with the volume turned all the way up. Your ear runs the soft version constantly; the rulebook is the rare moment it goes rigid.</p>
   </details>
+
+  <section class="scholar">
+    <p class="eyebrow">The research behind the shading</p>
+    <h2>Why these notes count as “lullaby notes”</h2>
+
+    <p>
+      The shading isn't arbitrary, but it also isn't magic. Researchers who study infant-directed
+      song have found a recurring cluster of features across lullabies from many different cultures —
+      traits that seem to follow from what the song is <em>for</em> (calming a baby) rather than from any
+      one musical tradition.<sup><a href="#r1">1</a></sup> A few of those features are things this little
+      keyboard can actually reflect:
+    </p>
+
+    <ul class="feat">
+      <li><b>Descending melodic lines.</b>
+        <span class="why">Lullabies tend to drift <em>downward</em> — falling pitch contours that mirror the soothing,
+        settling shapes caregivers use when speaking to infants.<sup><a href="#r2">2</a></sup> Tunes that resolve
+        <em>down</em> to the tonic (here, C) lean on the low, restful end of the phrase.</span></li>
+      <li><b>A narrow pitch range.</b>
+        <span class="why">They stay small — few big leaps, most motion stepwise and close.<sup><a href="#r2">2</a></sup>
+        That's why the notes near the middle of the row get used far more than the edges.</span></li>
+      <li><b>Tonic and dominant as anchors.</b>
+        <span class="why">In tonal melodies the 1st and 5th scale degrees act as the two gravitational
+        “poles” a tune keeps returning to.<sup><a href="#r3">3</a></sup> In C major that's <b>C</b> and <b>G</b> —
+        the two brightest keys here, because the seed lullabies keep landing on them.</span></li>
+      <li><b>Repetition and simplicity.</b>
+        <span class="why">Short, repeated phrases with reduced rhythmic complexity — easy to remember, easy to
+        sing half-asleep.<sup><a href="#r1">1</a></sup> Repetition is exactly what turns a few notes into a
+        <em>weight</em>: the more a note recurs, the heavier its tally.</span></li>
+    </ul>
+
+    <p>
+      So the gold shading is really a stand-in for these tendencies. G and C glow because they're the
+      tonal anchors the examples circle back to; the near neighbors (E, F, D, A) get moderate weight because
+      narrow, stepwise, mostly-descending motion passes through them; B stays dim because these particular
+      tunes rarely reach for the leading tone.
+    </p>
+
+    <p class="q">
+      One honest complication, and it's the interesting part: when researchers ran <em>structural</em> analyses
+      trying to pin down what makes a lullaby a lullaby, they often <em>couldn't</em> find clean musical features
+      that separate lullabies from other songs — yet listeners still reliably identify them, even with the
+      words stripped out.<sup><a href="#r4">4</a></sup> In other words, the “lullaby-ness” your ear detects lives
+      partly in performance and context — softness, slowness, portamento, a mother's voice — not only in which
+      notes get played. This app shades <em>notes</em> because notes are what a keyboard has. That's a real
+      slice of the phenomenon, but it isn't the whole ghost. The rest is in the singing.
+    </p>
+
+    <div class="refs">
+      <h3>References</h3>
+      <ol>
+        <li id="r1">Trehub, S. E., &amp; Trainor, L. (1998). Singing to infants: Lullabies and play songs.
+          <em>Advances in Infancy Research</em>, 12, 43–78. (Summarized in Brooks, W. (2016),
+          <a href="https://files.eric.ed.gov/fulltext/EJ1146386.pdf" target="_blank" rel="noopener"><em>Australian Journal of Music Education</em>, 50(2)</a>.)</li>
+        <li id="r2">Rock, A. M., Trainor, L. J., &amp; Addison, T. L. (1999). Distinctive messages in infant-directed
+          lullabies and play songs. <em>Developmental Psychology</em>, 35(2), 527–534.</li>
+        <li id="r3">Tonic and dominant as the harmonic “poles” of tonal melody — standard music-theory framing;
+          see e.g. <a href="https://smbutterfield.github.io/ibmt17-18/02-int-scales-keys/b3-tx-scales.html" target="_blank" rel="noopener">Inquiry-Based Music Theory, Scales &amp; Scale Degrees</a>.</li>
+        <li id="r4">Unyk, A. M., Trehub, S. E., Trainor, L. J., &amp; Schellenberg, E. G. (1992). Lullabies and
+          simplicity: A cross-cultural perspective. <em>Psychology of Music</em>, 20(1), 15–27. See also
+          Mehr, S. A., et al. (2019), <a href="https://www.science.org/doi/10.1126/science.aax0868" target="_blank" rel="noopener">Universality and diversity in human song, <em>Science</em>, 366</a>.</li>
+      </ol>
+    </div>
+  </section>
 
   <footer>self-contained · web audio · no keys, no build, no network</footer>
 </div>
