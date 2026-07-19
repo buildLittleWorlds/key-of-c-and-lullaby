@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rulebook vs. Vibes — which ghost is in charge?</title>
+<style>
+  :root{
+    --bg:#0e1116;
+    --panel:#161b22;
+    --ink:#e8e2d4;
+    --muted:#8a8578;
+    --line:#2a2f38;
+    /* the two ghosts get two colours, used everywhere */
+    --rule:#6fb1c9;   /* cool blue = the written law */
+    --train:#d0a24c;  /* warm gold = the learned habit */
+    --dead:#3a3f48;   /* a forbidden / unlit key */
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    line-height:1.5;
+    padding:clamp(18px,5vw,56px);
+  }
+  .wrap{max-width:720px;margin:0 auto}
+  .eyebrow{
+    font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 14px;
+  }
+  h1{
+    font-family:Georgia,"Times New Roman",serif;
+    font-weight:400;font-size:clamp(1.7rem,5.5vw,2.7rem);
+    line-height:1.12;margin:0 0 18px;letter-spacing:-.01em;
+  }
+  h1 .a{color:var(--rule)} h1 .b{color:var(--train)}
+  .lede{color:var(--muted);font-size:.95rem;max-width:56ch;margin:0 0 30px}
+
+  /* the one thing to do */
+  .do{
+    border:1px solid var(--line);border-left:3px solid var(--ink);
+    background:var(--panel);padding:14px 16px;margin:0 0 26px;
+    font-size:.9rem;
+  }
+  .do b{color:var(--ink)}
+
+  /* mode toggle */
+  .modes{display:flex;gap:0;margin:0 0 6px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .modes button{
+    flex:1;background:transparent;color:var(--muted);border:0;
+    padding:13px 10px;font:inherit;font-size:.82rem;cursor:pointer;
+    letter-spacing:.02em;transition:background .15s,color .15s;
+  }
+  .modes button:hover{color:var(--ink)}
+  .modes button[aria-pressed="true"]{color:var(--bg);font-weight:600}
+  #btnRule[aria-pressed="true"]{background:var(--rule)}
+  #btnTrain[aria-pressed="true"]{background:var(--train)}
+  .modes button:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+
+  .caption{font-size:.8rem;color:var(--muted);min-height:2.6em;margin:0 0 16px}
+  .caption b{color:var(--ink);font-weight:600}
+
+  /* lullaby source player */
+  .source{display:flex;align-items:center;gap:12px;margin:0 0 14px;flex-wrap:wrap}
+  #btnPlay{
+    background:transparent;border:1px solid var(--train);color:var(--train);
+    padding:9px 15px;border-radius:20px;font:inherit;font-size:.8rem;cursor:pointer;
+    letter-spacing:.02em;white-space:nowrap;transition:background .15s,color .15s;
+  }
+  #btnPlay:hover{background:var(--train);color:var(--bg)}
+  #btnPlay:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  #btnPlay[disabled]{opacity:.55;cursor:default;background:transparent;color:var(--train)}
+  #srcLabel{font-size:.75rem;color:var(--muted)}
+
+  /* keyboard */
+  .keys{
+    display:flex;gap:6px;margin:0 0 8px;
+    touch-action:manipulation;
+  }
+  .key{
+    position:relative;flex:1;min-width:0;height:clamp(110px,26vw,150px);
+    background:var(--panel);border:1px solid var(--line);border-radius:0 0 7px 7px;
+    color:var(--muted);font:inherit;font-size:.8rem;cursor:pointer;
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:9px;
+    transition:transform .05s,background .12s,border-color .12s,box-shadow .12s;
+  }
+  .key .deg{position:absolute;top:8px;left:0;right:0;font-size:.62rem;color:var(--line)}
+  .key:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .key:active{transform:translateY(2px)}
+  /* lit weight, painted per-mode via inline --w and body class */
+  body.rule .key{--tint:var(--rule)}
+  body.train .key{--tint:var(--train)}
+  .key{
+    box-shadow:inset 0 calc(var(--w,0) * -110px) 0 -4px
+      color-mix(in srgb, var(--tint,#888) 22%, transparent);
+    border-color:color-mix(in srgb, var(--tint,#888) calc(var(--w,0)*70%), var(--line));
+  }
+  /* forbidden key in rulebook mode */
+  .key.dead{background:repeating-linear-gradient(45deg,var(--bg),var(--bg) 6px,var(--dead) 6px,var(--dead) 7px);
+    cursor:not-allowed;box-shadow:none;border-color:var(--line)}
+  .key.dead .name{opacity:.35}
+  .key.flash{background:var(--tint)!important;color:var(--bg)!important}
+
+  .legend{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin:0 0 26px}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .swatch{width:22px;height:8px;border-radius:2px;display:inline-block;background:linear-gradient(90deg,transparent,currentColor)}
+
+  /* notice + honesty */
+  .notice{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin:0 0 18px}
+  .notice h2{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+  .notice p{margin:0 0 10px;font-size:.88rem}
+  .notice p:last-child{margin:0}
+  details{border-top:1px solid var(--line);margin-top:16px;padding-top:14px}
+  summary{cursor:pointer;font-size:.8rem;color:var(--muted);letter-spacing:.02em}
+  summary:hover{color:var(--ink)}
+  details[open] summary{color:var(--ink);margin-bottom:10px}
+  details p{font-size:.83rem;color:var(--muted);margin:0 0 9px}
+  details b{color:var(--ink)}
+  footer{margin-top:30px;font-size:.72rem;color:var(--line);text-align:center}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body class="rule">
+<div class="wrap">
+
+  <p class="eyebrow">A paper app about where your ear gets its orders</p>
+  <h1>One keyboard,<br><span class="a">two ghosts</span> — which one<br>is in <span class="b">charge?</span></h1>
+  <p class="lede">
+    “Stay in the key of C” is a <b style="color:var(--rule)">rule</b> you can write in one sentence.
+    “Make it sound like a lullaby” is a <b style="color:var(--train)">habit</b> soaked up from a thousand examples.
+    Same seven keys below. Flip the ghost behind them and play the difference.
+  </p>
+
+  <div class="do">
+    <b>Do this:</b> pick a mode, then tap out a little tune — left to right, then wander back.
+    Now switch modes and play the <em>same</em> path again. Listen for what changed.
+  </div>
+
+  <div class="modes" role="group" aria-label="Which ghost runs the keyboard">
+    <button id="btnRule"  aria-pressed="true"  onclick="setMode('rule')">RULEBOOK · only scale notes exist</button>
+    <button id="btnTrain" aria-pressed="false" onclick="setMode('train')">TRAINED · every note, but weighted</button>
+  </div>
+  <p class="caption" id="caption"></p>
+
+  <div class="source">
+    <button id="btnPlay" onclick="playLullaby()">▶ Hear a lullaby phrase</button>
+    <span id="srcLabel">the shading below is a tally of tunes like these</span>
+  </div>
+
+  <div class="keys" id="keys" role="group" aria-label="Playable keys"></div>
+
+  <div class="legend">
+    <span style="color:var(--rule)"><i class="swatch"></i> shading = how welcome this note is</span>
+    <span>press <b style="color:var(--ink)">A S D F G H J</b> too</span>
+  </div>
+
+  <div class="notice">
+    <h2>What to notice</h2>
+    <p>
+      In <b style="color:var(--rule)">Rulebook</b>, the off-key notes are simply <em>gone</em> — struck out, unplayable.
+      There is no wrong note because wrong notes don't exist. The result is always “correct” and a little airless.
+    </p>
+    <p>
+      In <b style="color:var(--train)">Trained</b>, every key still plays — but the shading shows which notes the lullaby
+      examples leaned on. Hit <b style="color:var(--train)">Hear a lullaby phrase</b> and watch which keys light: the ones the tune
+      keeps landing on are the bright ones. That's the whole training set, made audible. Nothing's forbidden here; some things are just <em>likelier</em>.
+      You can break the mood. In Rulebook you can't even find the door.
+    </p>
+  </div>
+
+  <details>
+    <summary>Keep it honest — what this really shows vs. only suggests</summary>
+    <p><b>What it really shows:</b> the difference between a <em>hard constraint</em> (a note is removed) and a <em>soft weight</em> (a note is merely favoured). That gap is real, and you can hear it: the rulebook can't be surprising, the trained ear can.</p>
+    <p><b>What it only suggests:</b> that this is how a “trained model” works. It isn't, quite. The weights here are just a tally — I counted how often each scale-degree appears in three public-domain lullabies (Brahms, Twinkle, Rock-a-bye) and shaded the keys to match. That's a <em>histogram</em>, not a network. A real learned model weighs notes <em>in context</em> (what came before), holds thousands of such odds at once, and would happily suggest an out-of-key note if the examples did. This toy has no memory of your last note at all.</p>
+    <p><b>The honest punchline:</b> push far enough and the rule dissolves into the vibe. “Only scale notes” is really just “these notes got weight 1, the rest weight 0” — the hardest possible version of a trained preference. Law is habit with the volume turned all the way up. Your ear runs the soft version constantly; the rulebook is the rare moment it goes rigid.</p>
+  </details>
+
+  <footer>self-contained · web audio · no keys, no build, no network</footer>
+</div>
+
+<script>
+/* ---- the two ghosts, as data --------------------------------------- */
+// Seven white keys, one octave of C major. index 0..6 = C D E F G A B
+const NAMES = ["C","D","E","F","G","A","B"];
+const DEGREE = ["1","2","3","4","5","6","7"];
+const FREQ   = [261.63,293.66,329.63,349.23,392.00,440.00,493.88];
+const HOTKEY = ["a","s","d","f","g","h","j"];
+
+// RULEBOOK: in C major every white key is legal -> to make the demo bite,
+// we drop in two "off-key" black-note slots that the rule forbids outright.
+// So the row is really 9 slots; 2 of them are dead in rulebook mode.
+// slots: C  C#  D  E  F  F#  G  A  B   (a plausible little span)
+const SLOTS = [
+  {name:"C", deg:"1", f:261.63, scale:true },
+  {name:"C♯",deg:"♭", f:277.18, scale:false},
+  {name:"D", deg:"2", f:293.66, scale:true },
+  {name:"E", deg:"3", f:329.63, scale:true },
+  {name:"F", deg:"4", f:349.23, scale:true },
+  {name:"F♯",deg:"♭", f:369.99, scale:false},
+  {name:"G", deg:"5", f:392.00, scale:true },
+  {name:"A", deg:"6", f:440.00, scale:true },
+  {name:"B", deg:"7", f:493.88, scale:true },
+];
+const HOT = ["a","s","d","f","g","h","j","k","l"];
+
+// TRAINED weights: a tally of scale-degrees across three lullabies,
+// hand-counted from the melodies (public domain). Off-key notes get a
+// small but nonzero weight — the trained ear *could* go there.
+// keyed by slot name:
+const WEIGHT = {
+  "C":0.85, "C♯":0.06, "D":0.55, "E":0.80, "F":0.45,
+  "F♯":0.04, "G":1.00, "A":0.40, "B":0.20
+};
+
+const CAPTIONS = {
+  rule:  'The law speaks: <b>only the seven scale notes exist.</b> Two keys are struck out — tapping them does nothing. You cannot play a wrong note.',
+  train: 'The examples speak: <b>every key plays,</b> but the lullabies leaned hard on some notes. Brighter key = the trained ear expects it more. Break the mood if you dare.'
+};
+
+let mode = "rule";
+let ac;                       // AudioContext, lazily created
+const keysEl = document.getElementById("keys");
+const capEl  = document.getElementById("caption");
+
+/* ---- the source tunes, as slot-index sequences --------------------- */
+// These are the melodies the Trained weights were tallied from — three
+// public-domain lullabies, transcribed into this keyboard's slot indices.
+// slot map: 0=C 1=C# 2=D 3=E 4=F 5=F# 6=G 7=A 8=B
+const LULLABIES = [
+  { name:"Twinkle, Twinkle",
+    // C C G G A A G | F F E E D D C
+    seq:[0,0,6,6,7,7,6, 4,4,3,3,2,2,0] },
+  { name:"Brahms' Lullaby",
+    // E E G | E E G | E G B(hi~use B) A A G
+    seq:[3,3,6, 3,3,6, 3,6,8,7,7,6] },
+  { name:"Rock-a-bye Baby",
+    // G E G | A G E | in 3, a gentle rock
+    seq:[6,3,6, 7,6,3, 4,2,0] },
+];
+let tuneIdx = 0;              // which lullaby plays next
+let playing = false;
+
+/* ---- build the keyboard once --------------------------------------- */
+SLOTS.forEach((s, i) => {
+  const b = document.createElement("button");
+  b.className = "key";
+  b.dataset.i = i;
+  b.innerHTML = `<span class="deg">${s.deg}</span><span class="name">${s.name}</span>`;
+  b.addEventListener("pointerdown", e => { e.preventDefault(); hit(i); });
+  keysEl.appendChild(b);
+  s.el = b;
+});
+
+function setMode(m){
+  mode = m;
+  document.body.classList.toggle("rule", m==="rule");
+  document.body.classList.toggle("train", m==="train");
+  document.getElementById("btnRule").setAttribute("aria-pressed", m==="rule");
+  document.getElementById("btnTrain").setAttribute("aria-pressed", m==="train");
+  capEl.innerHTML = CAPTIONS[m];
+  paint();
+}
+
+function paint(){
+  SLOTS.forEach(s => {
+    const el = s.el;
+    el.classList.remove("dead");
+    if(mode==="rule"){
+      // hard: off-scale notes are removed
+      const w = s.scale ? 1 : 0;
+      el.style.setProperty("--w", w);
+      if(!s.scale){ el.classList.add("dead"); }
+      el.setAttribute("aria-disabled", !s.scale);
+    } else {
+      // soft: everything plays, weighted by the tally
+      el.style.setProperty("--w", WEIGHT[s.name] ?? 0.1);
+      el.removeAttribute("aria-disabled");
+    }
+  });
+}
+
+/* ---- sound --------------------------------------------------------- */
+function hit(i){
+  const s = SLOTS[i];
+  if(mode==="rule" && !s.scale){ buzz(s.el); return; }  // forbidden: no note
+  play(s.f);
+  flash(s.el);
+}
+function play(f){
+  try{
+    ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    if(ac.state==="suspended") ac.resume();
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = "triangle"; o.frequency.value = f;
+    const t = ac.currentTime;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.28, t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0008, t+0.9);
+    o.connect(g).connect(ac.destination);
+    o.start(t); o.stop(t+0.95);
+  }catch(e){/* no audio, still visual */}
+}
+function flash(el){
+  el.classList.add("flash");
+  setTimeout(()=>el.classList.remove("flash"), 110);
+}
+function buzz(el){                     // a dead-key nudge, no pitch
+  el.animate(
+    [{transform:"translateX(0)"},{transform:"translateX(-3px)"},
+     {transform:"translateX(3px)"},{transform:"translateX(0)"}],
+    {duration:160});
+}
+
+/* ---- play a source lullaby, lighting keys as it goes ---------------- */
+function playLullaby(){
+  if(playing) return;
+  if(mode!=="train") setMode("train");   // show the shading the tune explains
+  playing = true;
+  const tune = LULLABIES[tuneIdx];
+  tuneIdx = (tuneIdx + 1) % LULLABIES.length;   // next press = next tune
+
+  const btn = document.getElementById("btnPlay");
+  const lbl = document.getElementById("srcLabel");
+  btn.disabled = true;
+  lbl.textContent = "♪ " + tune.name + " — watch which keys it uses";
+
+  const step = 380;                             // ms per note
+  tune.seq.forEach((slot, n) => {
+    setTimeout(() => {
+      play(SLOTS[slot].f);
+      flash(SLOTS[slot].el);
+    }, n * step);
+  });
+  // re-enable when the phrase finishes
+  setTimeout(() => {
+    playing = false;
+    btn.disabled = false;
+    btn.textContent = "▶ Hear another (" + LULLABIES[tuneIdx].name + ")";
+    lbl.textContent = "those bright keys are why the shading looks the way it does";
+  }, tune.seq.length * step + 200);
+}
+
+/* ---- keyboard input ------------------------------------------------ */
+addEventListener("keydown", e=>{
+  if(e.repeat) return;
+  const i = HOT.indexOf(e.key.toLowerCase());
+  if(i>=0){ hit(i); SLOTS[i].el.focus(); }
+  if(e.key==="1"||e.key.toLowerCase()==="r") setMode("rule");
+  if(e.key==="2"||e.key.toLowerCase()==="t") setMode("train");
+});
+
+setMode("rule");   // start with the law
+</script>
+</body>
+</html>
